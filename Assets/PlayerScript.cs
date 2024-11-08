@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using TMPro;
 public class PlayerScript : MonoBehaviour
 {
 
@@ -10,6 +10,12 @@ public class PlayerScript : MonoBehaviour
     GameObject Cam;
 
     [SerializeField] int Speed;
+
+    [SerializeField] TextMeshProUGUI PoiText;
+    [SerializeField] int PoiVisited;
+
+
+    [SerializeField] List<ParticleSystem> particles;
     // Start is called before the first frame update
     void Start()
     {
@@ -47,6 +53,26 @@ public class PlayerScript : MonoBehaviour
         else if (Input.GetKey(KeyCode.E))
         {
             rb.AddForce((Cam.transform.up * Speed / 2) * Time.deltaTime, ForceMode.VelocityChange);
+        }
+
+        //scan
+        if (Input.GetKey(KeyCode.Space))
+        {
+            Scan();
+        }
+    }
+
+    public void AddPOI()
+    {
+        PoiVisited++;
+        PoiText.text = "Scan POI: " + PoiVisited + "/3";
+    }
+
+    void Scan ()
+    {
+        foreach (ParticleSystem particle in particles)
+        {
+            particle.Play();
         }
     }
 }
