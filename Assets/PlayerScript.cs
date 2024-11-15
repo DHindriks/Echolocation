@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 public class PlayerScript : MonoBehaviour
 {
@@ -14,18 +15,36 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] TextMeshProUGUI PoiText;
     [SerializeField] int PoiVisited;
 
+    [SerializeField] List<AudioClip> Scancomplete;
+    [SerializeField] AudioSource PSource;
+
 
     [SerializeField] List<ParticleSystem> particles;
+
+    [SerializeField] CanvasGroup GameOverScreen;
+    [SerializeField] CanvasGroup GameOverText;
+
+    bool ControlsEnabled = true;
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         Cam = transform.GetChild(0).gameObject;
+        AddPOI(0);
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!ControlsEnabled)
+        {
+            if (Input.GetKey(KeyCode.Space))
+            {
+                SceneManager.LoadScene("Menu");
+            }
+            return;
+        }
+
         //forward/backward
         if (Input.GetKey(KeyCode.W))
         {
@@ -56,16 +75,40 @@ public class PlayerScript : MonoBehaviour
         }
 
         //scan
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             Scan();
         }
     }
 
-    public void AddPOI()
+    public void AddPOI(int amount)
     {
-        PoiVisited++;
-        PoiText.text = "Scan POI: " + PoiVisited + "/3";
+        PoiVisited += amount;
+        if (PoiVisited >= 3)
+        {
+            PoiText.text = "All signals recovered";
+        }
+        else
+        {
+            PoiText.text = "Scan Wreck signals: " + PoiVisited + "/3";
+        }
+        if (amount > 0)
+        {
+            PSource.clip = Scancomplete[Random.Range(0, Scancomplete.Count)];
+            PSource.Play();
+        }
+    }
+
+    public void ChangeText(string txt)
+    {
+        PoiText.text = txt;
+    }
+
+    public void GameOver()
+    {
+        GameOverScreen.alpha = 1;
+        GameOverText.alpha = 1;
+        ControlsEnabled = false;
     }
 
     void Scan ()
